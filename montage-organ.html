@@ -44,47 +44,29 @@ async function init(el){
   video.src = media;
   el.remove()
   
-  /*  
-    Initialize MIDI 
-  */
-  
   const midi = await navigator.requestMIDIAccess()
   const inputs = [...midi.inputs.values()]
-  //   const outputs = [...midi.outputs.values()]
-  //   console.log(inputs, outputs)
-  
-  // Add event listener for each device connected
+  const outputs = [...midi.outputs.values()]
+  console.log(inputs)
   inputs.forEach(input => {
-    input.addEventListener('midimessage', midiMessageRecieved)
+    input.onmidimessage = midiMessageRecieved
   })
 }
 
-/*
-
-  HANDLE MIDI NOTE
-
-*/
 const NOTE_ON = 9
 const NOTE_OFF = 8
-
-/*
-  The video always starts in the middle of the movie.
-  if the user plays a lower note, the software assumes
-  that should be the beginning of the video
-  if the user plays a higher note, the software
-  assumes that should be the end of the video. 
-  it then calculates the video location between those two values
-*/
-
-let low_note = 63
-let high_note = 65
+let low_note = 64
+let high_note = 64
 async function midiMessageRecieved(message){
+  console.log(message)
+  
   const VIDEO_DURATION = video.duration
   const cmd = event.data[0] >> 4
   const pitch = event.data[1]
   const velocity = (event.data.length > 2) ? event.data[2] : 1
   const timestamp = Date.now()
   let video_location = 0
+
   if(cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
     console.log(`🎧 from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`)
   } else if (cmd === NOTE_ON) {
@@ -96,12 +78,14 @@ async function midiMessageRecieved(message){
       video_location = VIDEO_DURATION - 2000
     } else {
       video_location = VIDEO_DURATION * ((pitch - low_note) / 128)
-      video.currentTime = video_location
-      if(video.paused){
-        video.play()
-        setTimeout(function(){video.pause()}, 3000)
-      }
     }
+    
+    video.currentTime = video_location
+    if(video.paused){
+      video.play()
+      setTimeout(function(){video.pause()}, 3000)
+    }
+
   }
 }
 
