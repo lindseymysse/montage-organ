@@ -13,7 +13,6 @@
       top: 50%;
       transform: translate(-50%, -50%);
     }
-
     video {
       position: fixed;
       left: 0px;
@@ -22,14 +21,17 @@
       height: auto;
       z-index:-1;
     }
-
   </style>
 </head>
 <body>
 <video autoplay></video>
 <input type="file" onchange="init(this)">
 <script>
+/*
 
+  MONTAGE ORGAN
+
+*/
 
 const video = document.querySelector("video")
 
@@ -49,12 +51,16 @@ async function init(el){
   })
 }
   
-// The video always starts at the beginning of the movie.
-// if the user plays a lower note, the software assumes
-// that should be the beginning of the video
-// if the user plays a higher note, the software
-// assumes that should be the end of the video - 2000. 
-// it then calculates the video location between those two values
+/*
+
+  HANDLE MIDI MESSAGE
+
+  The video always starts at the beginning of the movie.
+  If the user plays a lower note, the software assumes that should be the beginning of the video
+  If the user plays a higher note, the software assumes that should be the end of the video - 2000. 
+  It then calculates the video location between those two values
+
+*/
 
 const NOTE_ON = 9
 const NOTE_OFF = 8
@@ -93,6 +99,5 @@ async function midiMessageRecieved(message){
 }
 
 </script>
-
 </body>
 </html>
