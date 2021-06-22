@@ -52,6 +52,14 @@ async function init(el){
     input.onmidimessage = midiMessageRecieved
   })
 }
+  
+// The video always starts in the middle of the movie.
+// if the user plays a lower note, the software assumes
+// that should be the beginning of the video
+// if the user plays a higher note, the software
+// assumes that should be the end of the video. 
+// it then calculates the video location between those two values
+
 
 const NOTE_ON = 9
 const NOTE_OFF = 8
