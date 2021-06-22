@@ -34,16 +34,12 @@
 const video = document.querySelector("video")
 
 async function init(el){
-  /*
-    
-    Load the Video File
-
-  */
-
+  /* Load the Video File */
   const media = URL.createObjectURL(el.files[0])
   video.src = media;
   el.remove()
   
+  /* initialize MIDI devices */
   const midi = await navigator.requestMIDIAccess()
   const inputs = [...midi.inputs.values()]
   const outputs = [...midi.outputs.values()]
@@ -53,13 +49,12 @@ async function init(el){
   })
 }
   
-// The video always starts in the middle of the movie.
+// The video always starts at the beginning of the movie.
 // if the user plays a lower note, the software assumes
 // that should be the beginning of the video
 // if the user plays a higher note, the software
-// assumes that should be the end of the video. 
+// assumes that should be the end of the video - 2000. 
 // it then calculates the video location between those two values
-
 
 const NOTE_ON = 9
 const NOTE_OFF = 8
