@@ -1,195 +1,109 @@
-<!doctype html>
-<html lang="en-us">
-  <head>
-    <title>Montage Organ</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Your game description goes here.">
-    <link rel="icon" href="icon.png">
-    <style>
-            
-      * {
-        box-sizing: border-box;
-        touch-action: manipulation;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-touch-callout: none;
-      }
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Montage Organ</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Simple VJ Software">
+  <style>
+    input {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
 
-      html {
-        height: 100%;
-        overflow: hidden;
-      }
+    video {
+      position: fixed;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: auto;
+      z-index:-1;
+    }
 
-      body {
-        width: 100%;
-        height: 100%;
-        margin: 0px auto;
-        font-size: 1.5em;
-        background-color: #000;
-        color: #fff;
-      background: black;
-
-      }
-
-      video {
-         position: fixed;
-         left: 0px;
-         top: 0px;
-         width: 100%;
-         height: auto;
-         opacity: 0.5;
-
-      }
-
-      @media (max-width: 700px), (max-height: 820px) {
-       body {
-         font-size: 0.75em;
-       }
-      }
-
-      canvas {
-        image-rendering: optimizeSpeed;
-        image-rendering: crisp-edges;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: -o-crisp-edges;
-        image-rendering: -webkit-optimize-contrast;
-        -ms-interpolation-mode: nearest-neighbor;
-        image-rendering: pixelated;
-        opacity: 0.5;
-      }
-
-
-      /*** screens ***/
-
-      .screen {
-        height: 100%;
-        width: 100%;
-        position: fixed;
-        left: 0px;
-        top: 0px;
-        z-index:1000;
-      }
-
-    </style>
-  </head>
-  <body>
-
-<video style="filter: hue-rotate(-45deg) contrast(1.8)" id="video"></video>
-<input style="position: absolute; left: 0px; top:0px"  id="video-chooser" type="file">
+  </style>
+</head>
+<body>
+<video autoplay></video>
+<input type="file" onchange="init(this)">
 <script>
-  function connect() {
-  navigator.requestMIDIAccess()
-  .then(
-    (midi) => midiReady(midi),
-    (err) => console.log('Something went wrong', err));
-}
-
-function midiReady(midi) {
-  // Also react to device changes.
-  midi.addEventListener('statechange', (event) => initDevices(event.target));
-  initDevices(midi); // see the next section!
-}
-
-function initDevices(midi) {
-  // Reset.
-  midiIn = [];
-  midiOut = [];
-  
-  // MIDI devices that send you data.
-  const inputs = midi.inputs.values();
-  for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
-    midiIn.push(input.value);
-  }
-  
-  // MIDI devices that you send data to.
-  const outputs = midi.outputs.values();
-  for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
-    midiOut.push(output.value);
-  }
-  startListening();
-}
 
 
-// Start listening to MIDI messages.
-function startListening() {
-  for (const input of midiIn) {
-    input.addEventListener('midimessage', midiMessageReceived);
-  }
-}
+const video = document.querySelector("video")
 
+async function init(el){
+  /*
+    
+    Load the Video File
 
-let video_initialized = false
+  */
 
-
-
-document.querySelector('#video-chooser').addEventListener('change', (e) => {
-    var media = URL.createObjectURL(e.target.files[0]);
-  var video = document.getElementById("video");
+  const media = URL.createObjectURL(el.files[0])
   video.src = media;
-  video.style.display = "block";
-  video_initialized = true
-  e.target.remove()
-})
-
-
-
-
-function midiMessageReceived(event) {
-  if(!video_initialized) return
-  // MIDI commands we care about. See
-  // http://webaudio.github.io/web-midi-api/#a-simple-monophonic-sine-wave-midi-synthesizer.
-  const NOTE_ON = 9;
-  const NOTE_OFF = 8;
-
-  const cmd = event.data[0] >> 4;
-  const pitch = event.data[1];
-  const velocity = (event.data.length > 2) ? event.data[2] : 1;
+  el.remove()
   
-  // You can use the timestamp to figure out the duration of each note.
-  const timestamp = Date.now();
+  /*  
+    Initialize MIDI 
+  */
   
-  // Note that not all MIDI controllers send a separate NOTE_OFF command for every NOTE_ON.
-  if (cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
-    console.log(`🎧 from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`);
-    console.log(cmd)
-    // video.pause()
+  const midi = await navigator.requestMIDIAccess()
+  const inputs = [...midi.inputs.values()]
+  //   const outputs = [...midi.outputs.values()]
+  //   console.log(inputs, outputs)
   
-  } else if(cmd === NOTE_ON){
-    console.log(pitch)
+  // Add event listener for each device connected
+  inputs.forEach(input => {
+    input.addEventListener('midimessage', midiMessageRecieved)
+  })
+}
 
-    let current_time = (pitch + 33 / 90) / 100
+/*
 
-    video.currentTime =  video.duration * current_time
+  HANDLE MIDI NOTE
 
-    if(video.paused){
-      video.play()
-      setTimeout(function(){video.pause()},3000)
+*/
+const NOTE_ON = 9
+const NOTE_OFF = 8
+
+// The video always starts in the middle of the movie.
+// if the user plays a lower note, the software assumes
+// that should be the beginning of the video
+// if the user plays a higher note, the software
+// assumes that should be the end of the video. 
+// it then calculates the video location between those two values
+let low_note = 63
+let high_note = 65
+async function midiMessageRecieved(message){
+  const VIDEO_DURATION = video.duration
+  const cmd = event.data[0] >> 4
+  const pitch = event.data[1]
+  const velocity = (event.data.length > 2) ? event.data[2] : 1
+  const timestamp = Date.now()
+  let video_location = 0
+
+  if(cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
+    console.log(`🎧 from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`)
+  } else if (cmd === NOTE_ON) {
+    if(pitch < low_note){
+      low_note = pitch
+      video_location = 0
+    } else if (pitch > high_note){
+      high_note = pitch
+      video_location = VIDEO_DURATION - 2000
+    } else {
+      video_location = VIDEO_DURATION * ((pitch - low_note) / 128)
+      video.currentTime = video_location
+      if(video.paused){
+        video.play()
+        setTimeout(function(){video.pause()}, 3000)
+      }
     }
   }
-
 }
-
-function sendMidiMessage(pitch, velocity, duration) {
-  const NOTE_ON = 0x90;
-  const NOTE_OFF = 0x80;
-  
-  const device = midiOut[selectOut.selectedIndex];
-  const msgOn = [NOTE_ON, pitch, velocity];
-  const msgOff = [NOTE_ON, pitch, velocity];
-  
-  // First send the note on;
-  device.send(msgOn); 
-    
-  // Then send the note off. You can send this separately if you want 
-  // (i.e. when the button is released)
-  device.send(msgOff, Date.now() + duration); 
-}
-
-connect()
 
 </script>
 
-
+</body>
 </html>
