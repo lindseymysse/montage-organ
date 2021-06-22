@@ -67,12 +67,15 @@ async function init(el){
 const NOTE_ON = 9
 const NOTE_OFF = 8
 
-// The video always starts in the middle of the movie.
-// if the user plays a lower note, the software assumes
-// that should be the beginning of the video
-// if the user plays a higher note, the software
-// assumes that should be the end of the video. 
-// it then calculates the video location between those two values
+/*
+  The video always starts in the middle of the movie.
+  if the user plays a lower note, the software assumes
+  that should be the beginning of the video
+  if the user plays a higher note, the software
+  assumes that should be the end of the video. 
+  it then calculates the video location between those two values
+*/
+
 let low_note = 63
 let high_note = 65
 async function midiMessageRecieved(message){
@@ -82,7 +85,6 @@ async function midiMessageRecieved(message){
   const velocity = (event.data.length > 2) ? event.data[2] : 1
   const timestamp = Date.now()
   let video_location = 0
-
   if(cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
     console.log(`🎧 from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`)
   } else if (cmd === NOTE_ON) {
