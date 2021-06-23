@@ -72,6 +72,7 @@
 <p>Use any MIDI Device to play the movie like a sampler</p>
 <p>If you want to use a different movie, reload the page</p>
 <p>With a Linux Thinkpad running Chrome, my Roland GR-55 just works, but my OP-1 Requires me to switch between modes first to work. I have no other devices to test with. YMMV. </p>
+<p>You can also control it with QWERTY. Press Space bar to pause the movie</p>
 <p><a href="https://lindseymysse.com/" target="_blank">Stop by to say hi sometime</a></p>
 <p><a href="https://github.com/lindseymysse/montage-organ/blob/main/montage-organ.html">Please read my code, it's not that much but you can do a whole lot with it.</a></p>
 
@@ -84,7 +85,7 @@
  --> 
 </div>
 <video autoplay></video>
-<input type="file" onchange="init(this)">
+<input type="file" accept="video/MP4" onchange="init(this)">
 
 <script>
 
@@ -162,7 +163,7 @@ async function midiMessageRecieved(message){
       // If the user plays a higher note than high_note, 
       // the software assumes that should be the end of the video - 10000ms. 
       high_note = pitch
-      video_location = VIDEO_DURATION - 10000
+      video_location = VIDEO_DURATION
     } else {
       // otherwise, calculate the pitch's location between the two values
       video_location = VIDEO_DURATION * ((pitch - low_note) / 128)
@@ -184,12 +185,15 @@ async function midiMessageRecieved(message){
 
 */
 
-const key_index = `qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM`.split('')
-console.log(key_index.length)
+const key_index = `qwertyuiopasdfghjklzxcvbnm`.split('')
 
 document.addEventListener('keydown', function(e){
-
-  const pitch = key_index.indexOf(e.key) / 100
+  const index = key_index.indexOf(e.key)
+  if(index === -1){
+    if(e.key ===  ' ' && !video.paused){video.pause()}
+    return
+  }
+  const pitch = index / key_index.length
   let video_location = video.duration *  pitch
   video.currentTime = video_location
   video.play()
