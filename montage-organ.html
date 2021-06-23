@@ -67,14 +67,17 @@
 
 
 <div id="introduction">
-  <h1>Montage Organ</h1>
-<p>Upload an MP4 file</p>
-<p>Use any MIDI Device to play the movie like a sampler</p>
-<p>If you want to use a different movie, reload the page</p>
-<p>With a Linux Thinkpad running Chrome, my Roland GR-55 just works, but my OP-1 Requires me to switch between modes first to work. I have no other devices to test with. YMMV. </p>
-<p>You can also control it with QWERTY. Press Space bar to pause the movie</p>
-<p><a href="https://lindseymysse.com/" target="_blank">Stop by to say hi sometime</a></p>
-<p><a href="https://github.com/lindseymysse/montage-organ/blob/main/montage-organ.html">Please read my code, it's not that much but you can do a whole lot with it.</a></p>
+  <ul>
+    <li><h1>Montage Organ</h1></li>
+    <li><p>Upload an MP4 file</p></li>
+    <li><p>Use any MIDI Device to play the movie like a sampler</p></li>
+    <li><p>If you want to use a different movie, reload the page</p></li>
+    <li><p>With a Linux Thinkpad running Chrome, my Roland GR-55 just works, but my OP-1 Requires me to switch between modes first to work. I have no other devices to test with. YMMV. </p></li>
+    <li><p>You can also control it with QWERTY. Press Space bar to pause the movie</p></li>
+    <li><p><a href="https://lindseymysse.com/" target="_blank">Stop by to say hi sometime</a></p></li>
+    <li><p><a href="https://github.com/lindseymysse/montage-organ/blob/main/montage-organ.html">Please read my code, it's not that much but you can do a whole lot with it.</a></p></li>
+  </ul>
+</div>
 
 <!-- 
 
@@ -83,19 +86,19 @@
   an input, and a video. When the user selects an input the application kicks off
 
  --> 
-</div>
+
+
 <video autoplay></video>
 <input type="file" accept="video/MP4" onchange="init(this)">
 
 <script>
-
-// People talk a lot of sh*t about javascript, but I think it's a beautiful language
 
 const video = document.querySelector("video")
 
 // this function starts with async, which tell the computer that it might be
 // waiting around for each function to complete. 
 async function init(el){
+
   /* Load the Video File */
   const media = URL.createObjectURL(el.files[0])
   video.src = media
@@ -103,7 +106,6 @@ async function init(el){
   // Now remove the introduction and the input since we don't need them anymore
   el.remove()
   document.querySelector('#introduction').remove()
-
   
   /* 
 
@@ -112,12 +114,16 @@ async function init(el){
     No, there is no error handling, why do you ask? 
 
   */
+
   const midi = await navigator.requestMIDIAccess()
 
-  // the following array magic is pretty new javascript
-  // you can cast all sorts of iterable values
-  // (that is to say, values that you can step through
-  // and reason about one at a time easily )
+  /*
+    the following array magic is pretty new javascript
+    you can cast all sorts of iterable values
+   (that is to say, values that you can step through
+   and reason about one at a time easily )
+  
+  */ 
 
   ;[...midi.inputs.values()].forEach(input => {
     input.onmidimessage = midiMessageRecieved
