@@ -1,3 +1,30 @@
+<!--
+
+  #     # ####### #     # #######    #     #####  #######
+  ##   ## #     # ##    #    #      # #   #     # #
+  # # # # #     # # #   #    #     #   #  #       #
+  #  #  # #     # #  #  #    #    #     # #  #### #####
+  #     # #     # #   # #    #    ####### #     # #
+  #     # #     # #    ##    #    #     # #     # #
+  #     # ####### #     #    #    #     #  #####  #######
+
+  ####### ######   #####     #    #     #
+  #     # #     # #     #   # #   ##    #
+  #     # #     # #        #   #  # #   #
+  #     # ######  #  #### #     # #  #  #
+  #     # #   #   #     # ####### #   # #
+  #     # #    #  #     # #     # #    ##
+  ####### #     #  #####  #     # #     #
+
+  By LNSY
+
+  You ever read old texts? They always start with some long winded
+  introduction. HTML is really no different. The following just describes
+  to the computer what I'm showing it
+
+-->
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +34,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Simple VJ Software">
   <style>
+    body {
+      background-color: black;
+      color: white;
+    }
     input {
       position: absolute;
       left: 50%;
@@ -17,58 +48,101 @@
       position: fixed;
       left: 0px;
       top: 0px;
-      width: 100%;
+      min-width: 100%;
+      width:auto;
       height: auto;
+      min-height: 100%;
       z-index:-1;
     }
   </style>
 </head>
+
+<!--
+
+  The next section is what the user sees, or rather what their browser renders,
+  but let's not go so far into the deep end right away. 
+
+!-->
 <body>
+
+
+<div id="introduction">
+  <h1>Montage Organ</h1>
+<p>Upload an MP4 file</p>
+<p>Use any MIDI Device to play the movie like a sampler</p>
+<p>If you want to use a different movie, reload the page</p>
+<p>With a Linux Thinkpad running Chrome, my Roland GR-55 just works, but my OP-1 Requires me to switch between modes first to work. I have no other devices to test with. YMMV. </p>
+<p><a href="https://lindseymysse.com/" target="_blank">Stop by to say hi sometime</a></p>
+<p><a href="https://github.com/lindseymysse/montage-organ/blob/main/montage-organ.html">Please read my code, it's not that much but you can do a whole lot with it.</a></p>
+
+<!-- 
+
+
+  This is where the real code starts. All we have are two elements: 
+  an input, and a video. When the user selects an input the application kicks off
+
+ --> 
+</div>
 <video autoplay></video>
 <input type="file" onchange="init(this)">
+
 <script>
-/*
 
-  MONTAGE ORGAN
-
-*/
+// People talk a lot of sh*t about javascript, but I think it's a beautiful language
 
 const video = document.querySelector("video")
 
+// this function starts with async, which tell the computer that it might be
+// waiting around for each function to complete. 
 async function init(el){
   /* Load the Video File */
   const media = URL.createObjectURL(el.files[0])
-  video.src = media;
+  video.src = media
+
+  // Now remove the introduction and the input since we don't need them anymore
   el.remove()
+  document.querySelector('#introduction').remove()
+
   
-  /* initialize MIDI devices */
+  /* 
+
+    Initialize MIDI devices.
+
+    No, there is no error handling, why do you ask? 
+
+  */
   const midi = await navigator.requestMIDIAccess()
-  const inputs = [...midi.inputs.values()]
-  const outputs = [...midi.outputs.values()]
-  console.log(inputs)
-  inputs.forEach(input => {
+
+  // the following array magic is pretty new javascript
+  // you can cast all sorts of iterable values
+  // (that is to say, values that you can step through
+  // and reason about one at a time easily )
+
+  ;[...midi.inputs.values()].forEach(input => {
     input.onmidimessage = midiMessageRecieved
   })
+
+
 }
   
 /*
 
   HANDLE MIDI MESSAGE
 
+  Whenever there is a midi signal, the following function gets called. 
+
   The video always starts at the beginning of the movie.
-  If the user plays a lower note, the software assumes that should be the beginning of the video
-  If the user plays a higher note, the software assumes that should be the end of the video - 2000. 
   It then calculates the video location between those two values
 
 */
 
 const NOTE_ON = 9
 const NOTE_OFF = 8
-let low_note = 64
-let high_note = 64
-async function midiMessageRecieved(message){
-  console.log(message)
-  
+let loop_length = 2000
+let low_note = 37
+let high_note = 90
+let looping = false
+async function midiMessageRecieved(message){  
   const VIDEO_DURATION = video.duration
   const cmd = event.data[0] >> 4
   const pitch = event.data[1]
@@ -77,26 +151,50 @@ async function midiMessageRecieved(message){
   let video_location = 0
 
   if(cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
-    console.log(`🎧 from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`)
+    // do something if we get a note off
   } else if (cmd === NOTE_ON) {
     if(pitch < low_note){
+      // If the user plays a lower note than low_note
+      // the software assumes that should be the beginning of the video
       low_note = pitch
       video_location = 0
     } else if (pitch > high_note){
+      // If the user plays a higher note than high_note, 
+      // the software assumes that should be the end of the video - 10000ms. 
       high_note = pitch
-      video_location = VIDEO_DURATION - 2000
+      video_location = VIDEO_DURATION - 10000
     } else {
+      // otherwise, calculate the pitch's location between the two values
       video_location = VIDEO_DURATION * ((pitch - low_note) / 128)
     }
-    
-    video.currentTime = video_location
-    if(video.paused){
-      video.play()
-      setTimeout(function(){video.pause()}, 3000)
-    }
 
+    // set the current location
+    video.currentTime = video_location
+
+    // when you do that the video pauses, so start playing
+    video.play()
   }
+   
 }
+
+
+/*
+
+  HANDLE KEYBOARD MESSAGES
+
+*/
+
+const key_index = `qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM`.split('')
+console.log(key_index.length)
+
+document.addEventListener('keydown', function(e){
+
+  const pitch = key_index.indexOf(e.key) / 100
+  let video_location = video.duration *  pitch
+  video.currentTime = video_location
+  video.play()
+})
+
 
 </script>
 </body>
