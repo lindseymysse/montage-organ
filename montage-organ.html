@@ -18,10 +18,10 @@
 
   By LNSY
 
-  You ever read old texts? They always start with some long winded
-  introduction. HTML is really no different. The following just describes
-  to the computer what I'm showing it. You can mostly skip it until the 
-  next block of text that looks like this.
+  You ever read old texts? They always start with some long winded introduction. 
+  HTML is really no different. 
+  The following just describes to the computer what I'm showing it. 
+  You can mostly skip it until the next block of text that looks like this.
 
 -->
 
@@ -64,7 +64,8 @@
 
 <!--
 
-  The next section is what the user sees, or rather what their browser renders,
+  The next section is what the user sees, 
+  or rather what their browser renders,
   but let's not go so far into the deep end right away. 
 
 !-->
@@ -89,13 +90,12 @@
 <!-- 
 
 
-  This is where the real code starts. All we have are two elements: 
-  an input and a video. When the user selects an new file the application kicks off.
+  This is where the real code starts. 
+  We have two elements: an input and a video. 
+  When the user selects an new file the application kicks off.
 
   You can use CSS filters on the video element to customize your VJ set. 
-
   https://developer.mozilla.org/en-US/docs/Web/CSS/filter
-
   Replace the video element below with something that looks like: 
 
   <video autoplay 
@@ -112,8 +112,10 @@
 
 const video = document.querySelector("video")
 
-// this function starts with async, which tell the computer that it might be
-// waiting around for each function to complete. 
+// this function starts with async,
+// which tell the computer that it might be
+// waiting around 
+// for each function to complete. 
 async function init(el){
 
   /* Load the Video File */
@@ -135,15 +137,14 @@ async function init(el){
   const midi = await navigator.requestMIDIAccess()
 
   /*
-    the following array magic is pretty new javascript
-    you can cast all sorts of iterable values
-   (that is to say, values that you can step through
-   and reason about one at a time easily )
+    The following array magic is pretty new javascript.
+    You can cast all sorts of iterable values 
+    (that is to say, values that you can step through and reason about one at a time easily )
    
-   The semi-colon at the start of the array is because you can
-   write javascript without semi-colons until you can't. 
+   The semicolon at the start of the array is because 
+   you can write javascript without semicolons until you can't. 
    It's one of those old left-over quirks from long ago.
-   I find it charming.
+   I personally find it charming.
   
   */ 
 
@@ -213,17 +214,29 @@ async function midiMessageRecieved(message){
 
 */
 
+// a list of valid keys (just qwerty right now).
+// I split the string into an array to generate a lookup table
 const key_index = `qwertyuiopasdfghjklzxcvbnm`.split('')
 
+// detect when a user presses a key
 document.addEventListener('keydown', function(e){
+  
+  // this finds where in the array the key is
   const index = key_index.indexOf(e.key)
+  // if it's -1, it's not in the array,
   if(index === -1){
+    // if user has pressed space, pause
     if(e.key ===  ' ' && !video.paused){video.pause()}
     return
   }
+  
+  // determine the pitch to play (0.0 being lowest arbitary pitch, 1.0 highest)
   const pitch = index / key_index.length
+  // calculate the new location of the video
   let video_location = video.duration *  pitch
+  // set the current location
   video.currentTime = video_location
+  // because setting the currentTime in the video pauses the video, play the video again
   video.play()
 })
 
