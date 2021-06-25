@@ -90,7 +90,7 @@
 
 
   This is where the real code starts. All we have are two elements: 
-  an input, and a video. When the user selects an input the application kicks off.
+  an input and a video. When the user selects an new file the application kicks off.
 
   You can use CSS filters on the video element to customize your VJ set. 
 
@@ -139,6 +139,12 @@ async function init(el){
     you can cast all sorts of iterable values
    (that is to say, values that you can step through
    and reason about one at a time easily )
+   
+   The semi-colon at the start of the array is because you can
+   write javascript without semi-colons until you can't. 
+   
+   It's one of those old left-over quirks from long ago,
+   but I find it charming.
   
   */ 
 
@@ -153,7 +159,7 @@ async function init(el){
 
   HANDLE MIDI MESSAGE
 
-  Whenever there is a midi signal, the following function gets called. 
+  Whenever there is a midi signal the following function gets called. 
 
   The video always starts at the beginning of the movie.
   It then calculates the video location between those two values
@@ -195,7 +201,7 @@ async function midiMessageRecieved(message){
     // set the current location
     video.currentTime = video_location
 
-    // when you do that the video pauses, so start playing
+    // when you do that the video pauses so start playing
     video.play()
   }
    
