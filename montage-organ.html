@@ -195,7 +195,7 @@ async function midiMessageRecieved(message){
       // If the user plays a higher note than high_note, 
       // the software assumes that should be the end of the video - 10000ms. 
       high_note = pitch
-      video_location = VIDEO_DURATION
+      video_location = VIDEO_DURATION - 100000
     } else {
       // otherwise, calculate the pitch's location between the two values
       video_location = VIDEO_DURATION * ((pitch - low_note) / 128)
