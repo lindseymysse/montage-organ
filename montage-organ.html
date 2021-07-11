@@ -251,9 +251,26 @@ document.addEventListener('keydown', function(e){
 */
 
 function handleScreenSelect(e){
+  /*
+    
+    e is the event. it gives us the offset from theleft of the screen
+    divided by the screen width gives us the location of the event
+    by percentage. 
+
+  */
   const x_loc = e.offsetX / window.innerWidth
+
+  // putting something in a try /  catch like this
+  // makes sure our software doesn't stop when 
+  // something goes wrong. For instance, 
+  // if the user clicks anywhere on the screen before
+  // the video is initialized, the video will throw
+  // an error. Her we catch that error and output
+  // a little message to console. 
   try {
+    // then we multiply that percentage to the duration of the video
     const video_location = video.duration * x_loc
+    // we then use that value to set the current time
     video.currentTime = video_location
     video.play()  
   } catch(e){
@@ -261,6 +278,7 @@ function handleScreenSelect(e){
   }
 }
 
+// attach the events. 
 document.addEventListener("touchstart", handleScreenSelect)
 document.addEventListener("mousedown", handleScreenSelect)
 
