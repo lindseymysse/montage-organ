@@ -241,6 +241,28 @@ document.addEventListener('keydown', function(e){
   video.play()
 })
 
+/*
+
+  HANDLE SCREEN INTERACTIONS
+
+  takes either a tap for a tablet
+  or a mouseclick and move the video
+
+*/
+
+function handleScreenSelect(e){
+  const x_loc = e.offsetX / window.innerWidth
+  try {
+    const video_location = video.duration * x_loc
+    video.currentTime = video_location
+    video.play()  
+  } catch(e){
+    console.log(e)
+  }
+}
+
+document.addEventListener("touchstart", handleScreenSelect)
+document.addEventListener("mousedown", handleScreenSelect)
 
 </script>
 </body>
