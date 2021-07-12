@@ -122,6 +122,10 @@ async function init(el){
   const media = URL.createObjectURL(el.files[0])
   video.src = media
 
+  // hide the cursor over the video 
+  // for presentation
+  video.style.cursor = 'none'
+
   // Now remove the introduction and the input since we don't need them anymore
   el.remove()
   document.querySelector('#introduction').remove()
