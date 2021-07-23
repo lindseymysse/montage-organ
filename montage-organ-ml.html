@@ -34,6 +34,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Simple VJ Software">
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+
   <style>
     body {
       background-color: black;
@@ -47,6 +49,7 @@
       transform: translate(-50%, -50%);
     }
     video {
+      object-fit: contain;
       position: fixed;
       left: 0px;
       top: 0px;
@@ -108,6 +111,9 @@
 <video autoplay></video>
 <input type="file" accept="video/MP4" onchange="init(this)">
 
+
+
+
 <script>
 
 const video = document.querySelector("video")
@@ -150,6 +156,8 @@ async function init(el){
     you can write javascript without semicolons until you can't. 
     It's one of those old left-over quirks from long ago.
     I personally find it charming.
+
+    Try removing it and seeing what happens.
   
   */ 
 
@@ -157,6 +165,16 @@ async function init(el){
     input.onmidimessage = midiMessageRecieved
   })
 
+  /*
+    
+    initialize the machine learning component
+
+
+  */
+  video.loadeddata = function(e){
+    initML(video)
+
+  }
 
 }
   
@@ -289,6 +307,42 @@ function handleScreenSelect(e){
 document.addEventListener("touchstart", handleScreenSelect)
 document.addEventListener("mousedown", handleScreenSelect)
 
+
+
+function initML(video){
+
+  const objectDetector = ml5.objectDetector('cocossd', {}, objDetectionModelLoaded)
+
+  // When the model is loaded
+  function objDetectionModelLoaded() {
+    setInterval(function(){
+      // Detect objects in the video element
+      objectDetector.detect(video, (err, results) => {
+        if(results.length < 1) return
+        console.log("object:",results) // Will output bounding boxes of detected objects
+      })
+    },500)
+  }
+
+  // Create a new facemesh method
+  const facemesh = ml5.facemesh(video, facemeshModelLoaded);
+
+  // When the model is loaded
+  function facemeshModelLoaded() {
+    console.log("facemesh loaded")
+  }
+
+  // Listen to new 'predict' events
+
+  facemesh.on('predict', results => {
+    if(results.length < 1) return
+    console.log("face:",results)
+  })
+
+}
+
 </script>
+
+
 </body>
 </html>

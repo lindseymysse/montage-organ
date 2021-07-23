@@ -1,0 +1,28 @@
+{
+  "name": "montag-organ",
+  "version": "0.5.0",
+  "description": "Hackable, Distributed VJ Software",
+  "main": "index.js",
+  "scripts": {
+    "test": "lol"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lindseymysse/montage-organ.git"
+  },
+  "keywords": [
+    "vj",
+    "videodj"
+  ],
+  "author": "LNSY",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/lindseymysse/montage-organ/issues"
+  },
+  "homepage": "https://github.com/lindseymysse/montage-organ#readme",
+  "dependencies": {
+    "better-opn": "^3.0.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  }
+}
