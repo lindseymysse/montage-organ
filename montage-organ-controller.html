@@ -1,0 +1,228 @@
+<!--
+
+  #     # ####### #     # #######    #     #####  #######
+  ##   ## #     # ##    #    #      # #   #     # #
+  # # # # #     # # #   #    #     #   #  #       #
+  #  #  # #     # #  #  #    #    #     # #  #### #####
+  #     # #     # #   # #    #    ####### #     # #
+  #     # #     # #    ##    #    #     # #     # #
+  #     # ####### #     #    #    #     #  #####  #######
+
+  ####### ######   #####     #    #     #
+  #     # #     # #     #   # #   ##    #
+  #     # #     # #        #   #  # #   #
+  #     # ######  #  #### #     # #  #  #
+  #     # #   #   #     # ####### #   # #
+  #     # #    #  #     # #     # #    ##
+  ####### #     #  #####  #     # #     #
+
+  By LNSY
+
+  You ever read old texts? They always start with some long winded introduction. 
+  HTML is really no different. 
+  The following just describes to the computer what I'm showing it. 
+  You can mostly skip it until the next block of text that looks like this.
+
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Montana Controller</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Simple VJ Software">
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+    }
+
+    label {
+      max-width: 40em;
+      display: block;
+    }
+    video {
+      filter: contrast(2) brightness(1.2) saturate(4) hue-rotate(-50deg);
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: auto;
+      height: auto;
+      min-width: 80vw;
+      max-height: 100%;
+      z-index:-1;
+    }
+    li:first-child{
+      list-style: none
+    }
+
+    @keyframes spin {
+      from {
+          transform:rotate(0deg);
+      }
+      to {
+          transform:rotate(360deg);
+      }
+    }
+
+    .spin {
+        animation-name: spin;
+        animation-duration: 500000ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear; 
+
+    }
+  </style>
+</head>
+
+<!--
+
+  The next section is what the user sees, 
+  or rather what their browser renders,
+  but let's not go so far into the deep end right away. 
+
+!-->
+<body>
+
+
+
+  <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PEER</title>
+  <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  <script type="text/javascript" src="/lib/qr-code.js"></script>
+  <script type="text/javascript" src="/lib/peer-component.js"></script>
+</head>
+<body>
+
+  <div id="brcosa">
+  <label>
+    Brightness
+  <input type="range" min="0" max="2" value="1" step="0.01" name="brightness">
+  </label>
+  <label>
+    Contrast
+  <input type="range" min="0" max="2" value="1" step="0.01" name="contrast">
+  </label>
+    <label>
+    Hue Rotate
+    <input type="range" min="0" max="360" value="0"  name="hue-rotate">
+  </label>
+    <label>
+    Blur
+    <input type="range" min="0" max="10" value="1" step="1" name="blur">
+  </label>
+  </label>
+  </label>
+    <label>
+    grayscale
+    <input type="range" min="0" max="100" value="50" step="1" name="grayscale">
+  </label>
+  </label>
+  </label>
+    <label>
+    saturate
+    <input type="range" min="0" max="400" value="100" step="1" name="saturate">
+  </label>
+  <label>
+    invert
+    <input type="checkbox" name="invert">
+  </label>
+
+</div>
+
+
+
+<div id="other">
+  <button id="begin-spin">spin</button>
+  <label>
+    width
+    <input type="range" name="width">
+  </label>
+
+  <label>
+
+    left
+    <input type="range" name="left">
+  </label>
+  <label>
+    top
+    <input type="range" name="top">
+  </label>
+
+</div>
+
+
+  <script>
+
+  function getURLValues(URL = window.location.href ){
+    const search_params = new URLSearchParams(URL)
+    let options = {}
+    for (const [key, unparsed_value] of search_params) {
+      if(key !== window.location.origin + window.location.pathname + '?' ){
+        try {
+          const value = JSON.parse(decodeURI(unparsed_value))
+          options[key] = value
+        } catch {
+          options[key] = decodeURI(unparsed_value)
+        }
+      }
+    }
+    return options
+  }
+
+  const options = getURLValues()
+  const new_peer = document.createElement('peer-component')
+  new_peer.setAttribute('id', 'controller-peer')
+  new_peer.setAttribute('target-id', options['target-id'])
+  document.body.prepend(new_peer)
+
+  const brcosa = [...document.querySelector('#brcosa').querySelectorAll('input')]
+
+  function generateFilter(){
+    const brightness = document.querySelector('[name="brightness"]').value
+
+    const contrast = document.querySelector('[name="contrast"]').value
+
+    const hueRotate = document.querySelector('[name="hue-rotate"]').value
+    const blur = document.querySelector('[name="blur"]').value
+    const saturate = document.querySelector('[name="saturate"]').value
+    const invert = document.querySelector('[name="invert"]').checked ? 1 : 0
+    const grayscale = document.querySelector('[name="blur"]').value
+
+    const filter = `brightness(${brightness}) contrast(${contrast}) hue-rotate(${hueRotate}deg) blur(${blur}px) saturate(${saturate}%) grayscale(${grayscale}%) invert(${invert})`
+
+    return filter
+  }
+
+  brcosa.forEach(inp => {
+    inp.addEventListener('mousedown', function(e){
+      const filter = generateFilter()
+      new_peer.sendMessage({type:'update-filter', message:filter})
+    })
+  })
+
+
+  ;[...document.querySelector('#other').querySelectorAll('input')].forEach(inp => {
+    inp.addEventListener('mousedown', function(e){
+      new_peer.sendMessage({type:e.target.name, value:e.target.value})
+    })
+  })
+
+
+  </script>
+
+
+</body>
+</html>
+
+
+</body>
+</html>

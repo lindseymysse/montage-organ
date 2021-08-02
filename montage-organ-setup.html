@@ -1,0 +1,249 @@
+<!--
+
+  #     # ####### #     # #######    #     #####  #######
+  ##   ## #     # ##    #    #      # #   #     # #
+  # # # # #     # # #   #    #     #   #  #       #
+  #  #  # #     # #  #  #    #    #     # #  #### #####
+  #     # #     # #   # #    #    ####### #     # #
+  #     # #     # #    ##    #    #     # #     # #
+  #     # ####### #     #    #    #     #  #####  #######
+
+  ####### ######   #####     #    #     #
+  #     # #     # #     #   # #   ##    #
+  #     # #     # #        #   #  # #   #
+  #     # ######  #  #### #     # #  #  #
+  #     # #   #   #     # ####### #   # #
+  #     # #    #  #     # #     # #    ##
+  ####### #     #  #####  #     # #     #
+
+  By LNSY
+
+  You ever read old texts? They always start with some long winded introduction. 
+  HTML is really no different. 
+  The following just describes to the computer what I'm showing it. 
+  You can mostly skip it until the next block of text that looks like this.
+
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Montage Organ Setup</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Simple VJ Software">
+  <script src="/lib/qr-code.js"></script>
+
+  <script src="/ml5/dist/ml5.min.js"></script>
+  <script src="/peerjs/dist/peerjs.min.js"></script>
+
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+    }
+
+    video {
+      object-fit: contain;
+      position: fixed;
+      left: 0px;
+      top: 0px;
+      min-width: 100%;
+      width:auto;
+      height: auto;
+      min-height: 100%;
+      z-index:-1;
+    }
+    li:first-child{
+      list-style: none
+    }
+
+
+  </style>
+</head>
+
+<!--
+
+  The next section is what the user sees, 
+  or rather what their browser renders,
+  but let's not go so far into the deep end right away. 
+
+!-->
+<body>
+
+  <details open class="hide-on-timeout">
+    <summary></summary>
+    <header>
+      <h2>Montage Organ Setup</h2>
+      <p> Web-Based, Hackable VJ Framework</p>
+    </header>
+
+    <main>
+      <section id="video-select">
+        <table id="routing-table">
+            <thead>
+              <th>Slot</th>
+              <th>Input</th>
+              <th>Video</th>
+              <th>Mode</th>
+              <th>Filter</th>
+              <th>Delete</th>
+            </thead>
+        </table>
+        <button onclick="dispatch('ADD-SLOT')">Add new local video</button>
+        <button onclick="dispatch('ADD-VIDEO-STREAM')">Add new Video Stream</button>
+
+      </section>
+    </main>
+
+  </details>
+
+<script>
+
+
+function dispatch(name, detail = {}){
+  const initialize_event = new CustomEvent(name, {detail: detail})
+  document.dispatchEvent(initialize_event)
+}
+
+
+
+
+  async function init(index){
+
+    // MIDI DEVICES
+
+    const midi = await navigator.requestMIDIAccess()
+    const midi_devices = [...midi.inputs.values()]
+    const midi_markup = midi_devices.map(device => {
+      return `<option value="${device.id}">${device.name}</option>`
+    }).join('')
+
+    // video devices
+    const video_names = await fetch('/video-list').then(res => res.json())
+      
+    const video_markup = video_names.map(video_name => `<option value="${video_name}>${video_name}</option>`)
+
+
+    function generateRowMarkup(index){
+      return `
+        <tr id="slot-${index}">
+          <td>${index}</td>
+          <td>
+            <select class="midi-select" name="slot-${index}" onchange="handleMidiSelect(this)">
+              <option value="all">All</option>
+              <option value="none">None</option>
+              <option value="screen">Screen Position</option>
+              <option value="keyboard">qwerty keyboard</option>
+              ${midi_markup}
+            </select>
+          </td>
+          <td>
+            <select class="video-select" name="slot-${index}" onchange="handleVideoSelect(this)">
+              ${video_markup}
+            </select>
+          </td>
+          <td>
+            <select class="mode-select" name="slot-${index}" 
+              onchange="handleModeSelect(this)">
+              <option value="loop">loop</option>
+              <option value="one-shot">one-shot</option>
+              <option value="auto-play-and-loop">auto-play and loop</option>
+            </select>
+          </td>
+          <td>
+            <input class="filter-input" name="slot-${index}" onchange="handleFilterChange(this)" type="text" />
+          </td>
+
+          <td><button onclick="dispatch('REMOVE-SLOT', {name: 'slot-${index}', index:${index}})">x</button></td>
+        </tr>
+      `
+    }
+
+
+    const routing_table = document.getElementById('routing-table')
+
+    let rows = []
+    let last_deleted_slot = null
+
+    document.addEventListener('ADD-SLOT', function(){
+
+      let row_name = 'slot-' + rows.length
+      let row_index = rows.length
+      if(last_deleted_slot !== null) {
+        row_name = 'slot-' + last_deleted_slot 
+        row_index = row_index === 0 ? 0 : last_deleted_slot
+      }
+      
+      rows.push({
+        name: row_name,
+        input: 'All',
+        video: video_names[0],
+        mode: 'Loop',
+        filter: ''
+      })
+      const montage_organ_row_markup = generateRowMarkup(row_index)
+      routing_table.innerHTML += montage_organ_row_markup
+
+      last_deleted_slot = null
+    })
+
+
+    document.addEventListener('REMOVE-SLOT', function(e){
+      rows = rows.filter(row => row.name !== e.detail.name)
+      console.log(rows)
+      last_deleted_slot = e.detail.index
+      document.querySelector(`#${e.detail.name}`).remove()
+    })
+
+    //peers
+
+    const peer = new Peer()
+    peer.on('connection', (conn) => {
+      conn.on('open', () => {
+        conn.send('CONNECTED TO MONTAGE ORGAN HOST')
+      })
+    })
+
+  }
+
+
+  document.addEventListener('DOMContentLoaded', function(e){
+    init()
+  })
+
+
+  function handleRemoveRow(el){
+    dispatch('REMOVE-SLOT', {name: el.name})
+  }
+
+  function handleMidiSelect(el){
+    dispatch('MIDI-SELECT', {name: el.name, value: el.value})
+    console.log(el.value, el.name)
+  }
+
+  function handleVideoSelect(el){
+    dispatch('VIDEO-SELECT', {name: el.name, value: el.value})
+
+    console.log(el.value, el.name)
+  }
+
+  function handleFilterChange(el){
+    dispatch('FILTER-CHANGE', {name: el.name, value: el.value})
+
+    console.log(el.value, el.name)
+  }
+
+  function handleModeSelect(el){
+    dispatch('MODE-SELECT', {name: el.name, value: el.value})
+
+    console.log(el.value, el.name)
+  }
+
+</script>
+
+</body>
+</html>

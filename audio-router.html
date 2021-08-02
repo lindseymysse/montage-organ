@@ -1,0 +1,66 @@
+<!--
+
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Montage Organ</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Simple VJ Software">
+</head>
+
+
+<body>
+
+  <h1>Monitor</h1>
+
+  <input type="file" onchange="handleNewFile()">
+
+  <div>
+    <h1>Inputs</h1>
+    <select id="audio-inputs" onchange="handleNewInput(this)"></select>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+<script>
+
+
+
+  async function handleNewInput(el){
+    const audioContext = new AudioContext();
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:false,
+      audio:{deviceId: {exact: el.value}}
+    })
+
+    var sound = new Howl({
+      src: [stream.getAudioTracks()[0]]
+    })
+
+    sound.play()
+
+
+  }
+
+  async function init(){
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    console.log(devices)
+    document.querySelector('#audio-inputs').innerHTML = [...devices]
+      .filter(device => device.kind === "audioinput")
+      .map(device => {
+      return `<option value="${device.deviceId}">${device.label}</option>`
+    }).join(' ')
+
+  }
+
+  window.onload = init
+</script>
+
+</body>
+</html>
+

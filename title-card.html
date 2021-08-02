@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Title Card</title>
+  
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&display=swap" rel="stylesheet">
+
+
+  <style>
+
+    @keyframes blurry {
+      from {
+          filter:blur(3px);
+      }
+      to {
+          filter:blur(1px);
+      }
+    }
+
+    .blurry {
+      filter: blur(1px);
+        animation-name: blurry;
+        animation-duration: 1000ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out; 
+        animation-direction:  alternate;
+
+    }
+
+
+  body {
+    background-color: black;} 
+
+    h1 {
+      filter: blur(2px);
+      margin-top: -2em;
+      color:  white;
+      font-size: 10em;
+      font-weight: bold;
+
+font-family: 'Bungee Shade', cursive;
+text-align: center;
+position:  fixed;
+left: 50%;
+top: 50%;
+transform:  translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="blurry">Journey to Planet Monelle</h1>
+
+</body>
+</html>

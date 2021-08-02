@@ -38,7 +38,7 @@ dotenv.config()
 
 let PORT = process.env.PORT
 if(!PORT){
-  PORT = 3000
+  PORT = 80
 }
 
 /*
@@ -54,10 +54,31 @@ if(!PORT){
 app.use(express.json())
 app.use('/', express.static(`${__dirname}/`))
 app.use('/videos', express.static(`${__dirname}/videos`))
+app.use('/', express.static(`${__dirname}/node_modules`))
 
 app.listen(PORT,() => { 
     console.log(`Running on PORT ${PORT}`)
 }) 
 
+
+const fs = require('fs')
+
+app.get('/video-list', (req, res) => {
+  const dir = `${__dirname}/videos`
+  fs.readdir(dir, (err, files) => {
+    if(err){
+      throw err
+    } 
+
+    files.forEach(file => {
+      console.log(file)
+    })
+
+    res.json(files)
+  })
+
+
+})
+
 process.env.OPEN_MATCH_HOST_ONLY = 'true'
-opn(`http://localhost:${PORT}/montage-organ-ml.html`)
+opn(`http://localhost:${PORT}/montage-organ-setup.html`)
