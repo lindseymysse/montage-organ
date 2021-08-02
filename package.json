@@ -4,6 +4,7 @@
   "description": "Hackable, Distributed VJ Software",
   "main": "index.js",
   "scripts": {
+    "start":"node index",
     "test": "lol"
   },
   "repository": {
