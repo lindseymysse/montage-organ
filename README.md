@@ -2,6 +2,8 @@
 
 ## Simple VJ software
 
+To use this app go to: https://lnsy-dev.github.io/montage-organ/montage-organ.html
+
 There are right ways to write VJ software. I've done that. But then there is a way you can that isn't quite "right" but sure is adaptable. That's this software. 
 
 Instead of architecting my video layers properly and creating a canvas with a WebGL context, I give you a video component and tell you to use the CSS Filter api to adjust what it looks like. 
