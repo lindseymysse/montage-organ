@@ -10,3 +10,5 @@ I've found it has certain affordances that make it very playable as a musical in
 
 I would strongly recomend you read the code. It is quite simple! Fork it and build your own rig on top.
 
+A good place to start is the montage-organt.html file: https://github.com/lnsy-dev/montage-organ/blob/main/montage-organ.html
+
